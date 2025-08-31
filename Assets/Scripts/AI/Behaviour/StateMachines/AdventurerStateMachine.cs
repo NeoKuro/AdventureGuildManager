@@ -1,6 +1,13 @@
-﻿using Hzn.Framework;
+﻿using System.Collections.Generic;
+
+using Hzn.Framework;
+
+using Unity.VisualScripting;
 
 using UnityEngine;
+
+using State = Hzn.Framework.State;
+using StateMachine = Hzn.Framework.StateMachine;
 
 public class AdventurerStateMachine : AICoreStateMachine
 {
@@ -12,8 +19,11 @@ public class AdventurerStateMachine : AICoreStateMachine
     private State VisitWilderness; // State controlling visiting the wilderness (_wildernessStateMachine dependency)
     private State VisitTown;       // State controlling visiting the town (_townStateMachine dependency)
 
-    public AdventurerStateMachine(bool tickable = false) : base(nameof(AdventurerStateMachine), tickable)
+    protected Adventurer_AIEntity AdventurerAI;
+
+    public AdventurerStateMachine(Adventurer_AIEntity ai, bool tickable = false) : base(nameof(AdventurerStateMachine), tickable)
     {
+        AdventurerAI = ai;
     }
 
     protected override void SetBehaviours()
@@ -45,7 +55,7 @@ public class AdventurerStateMachine : AICoreStateMachine
             .AllowTransitionTo(DestroyState);   // Destroy the AI (IE entered home to sleep so destroy/disable)
 
         VisitWilderness
-            .OnEntry(OnEnterVisitWilderness)          // Enter the _wildernessStateMachine SM
+            .OnEntry(OnEnterVisitWilderness)  // Enter the _wildernessStateMachine SM
             .AllowTransitionTo(VisitGuild)    // Go back to the Guild
             .AllowTransitionTo(VisitTown)     // Visit the town (shopping, socialising, go home etc)
             .AllowTransitionTo(DestroyState); // Destroy the AI (IE Exited town, Died etc)
@@ -65,6 +75,116 @@ public class AdventurerStateMachine : AICoreStateMachine
     {
         Dbg.Log(Log.AI, "ENTERED: Awake State");
         // Decide which State to enter - are we going to the town, or are we going to the guild, or going questing etc?
+        bool                                 hasJob       = AdventurerAI.HasJob();
+        Dictionary<EEntityPriorities, float> stats        = AdventurerAI.EvaluateStats();
+        float                                confidence   = AdventurerAI.EvaluateConfidenceNormalized();
+        float                                satisfaction = AdventurerAI.GetGuildSatisfaction();
+
+        List<(EEntityPriorities priority, float value)> priorities = new List<(EEntityPriorities, float)>();
+        foreach (KeyValuePair<EEntityPriorities, float> stat in stats)
+        {
+            priorities.Add((stat.Key, stat.Value));
+        }
+
+        priorities.Sort((a, b) => b.value.CompareTo(a.value));
+
+        for (int i = 0; i < priorities.Count; i++)
+        {
+            Dbg.Log(Log.AI, $"Stat: {priorities[i].priority} - {priorities[i].value}");
+            switch (priorities[i].priority)
+            {
+                case EEntityPriorities.Health:
+                    if (priorities[i].value >= 0.33f)
+                    {
+                        ChangeState(VisitTown);
+                        return;
+                    }
+                    break;
+                case EEntityPriorities.Energy:
+                    if (priorities[i].value >= 0.9f)
+                    {
+                        ChangeState(VisitTown);
+                        return;
+                    }
+                    break;
+                case EEntityPriorities.Hunger:
+                case EEntityPriorities.Thirst:
+                    if (priorities[i].value >= 0.6f)
+                    {
+                        // As Satisfaction decreases, the range the RNG will select from increases
+                        //  At 100% satisfaction, there is a 20% chance to not choose the guild services still
+                        //  At 0% satisfaction there is a 80% chance to choose town services over guild
+                        //  At 50% satisfaction, there is a 68% chance to choose town over guild services
+                        //  This will encourage players to maintain higher satisfaction rates as the drop off in going to town is
+                        //      significant beyond the 50% mark (~12% drop from 0% -> 50%, but a 48% drop from 50% -> 100%)
+                        float satisfactionPoint = UsefulMethods.Map(satisfaction, 0f, 1f, 0.0f, 0.75f);
+                        bool  goTown            = Random.Range(satisfactionPoint, 1f) < 0.8f;
+                        ChangeState(goTown ? VisitTown : VisitGuild);
+                        return;
+                    }
+                    break;
+                case EEntityPriorities.Social:
+                case EEntityPriorities.Boredom:
+                    if (priorities[i].value >= 0.7f)
+                    {
+                        // As Satisfaction decreases, the range the RNG will select from increases
+                        //  At 100% satisfaction, there is a 20% chance to not choose the guild services still
+                        //  At 0% satisfaction there is a 80% chance to choose town services over guild
+                        //  At 50% satisfaction, there is a 68% chance to choose town over guild services
+                        //  This will encourage players to maintain higher satisfaction rates as the drop off in going to town is
+                        //      significant beyond the 50% mark (~12% drop from 0% -> 50%, but a 48% drop from 50% -> 100%)
+                        float satisfactionPoint = UsefulMethods.Map(satisfaction, 0f, 1f, 0.0f, 0.75f);
+                        bool  goTown            = Random.Range(satisfactionPoint, 1f) < 0.8f;
+                        ChangeState(goTown ? VisitTown : VisitGuild);
+                        return;
+                    }
+                    break;
+            }
+        }
+
+        if (AdventurerAI.AdventurerData.AssignedRank == EAdventurerRank.None)
+        {
+            ChangeState(VisitGuild);
+            return;
+        }
+
+        // Check if they think they have the money to upgrade their gear
+        float wealth = AdventurerAI.EvaluateWealth();
+
+        // Check if they want to go get a job - If they need money
+        if (!hasJob)
+        {
+            // If their Wealth : Expected Wealth ratio is getting low, they will want to go get a job to earn more money
+            if (AdventurerAI.ShouldGetJob())
+            {
+                ChangeState(VisitGuild);
+                return;
+            }
+        }
+
+        // Are they confidence enough to complete the job? And do they have the money to improve their confidence?
+        if (confidence < 0.35f)
+        {
+            if (wealth > 0.66f)
+            {
+                ChangeState(VisitTown);
+                return;
+            }
+        }
+
+        // Minimum value is 0.25f
+        // Decide whether - after all other evaluations are complete - if the AI should go get a new job from the guild anyway
+        float jobPriority = AdventurerAI.GetJobPriority();
+        bool getJobAnyway = Random.Range(jobPriority, 1f) > 0.8f;
+        if (getJobAnyway)
+        {
+            ChangeState(VisitGuild);
+            return;
+        }
+        
+        // Otherwise - all stats are met (or cannot be met) so go to the Wilderness state to either do a job, explore or go training
+        //  All can earn money (selling loot, selling intel, completing jobs)
+        ChangeState(VisitWilderness);
     }
 
     private void OnEnterVisitGuild()

@@ -61,6 +61,11 @@ public class StaffEntity : Entity, IGuildStaff, ITownCore
         _onArriveAtGuildCallback -= onArrive;
     }
 
+    public float GetGuildSatisfaction()
+    {
+        throw new NotImplementedException();
+    }
+
     public void RegisterArriveAtTownDestinationCallback(Action onArrive)
     {
         _onArriveAtTownCallback += onArrive;

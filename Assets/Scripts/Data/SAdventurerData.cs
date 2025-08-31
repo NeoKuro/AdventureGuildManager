@@ -83,6 +83,7 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
                            ECharacterRace race,
                            int level,
                            string nickname,
+                           EAdventurerRank assignedRank,
                            EAdventurerRank hiddenRank,
                            SAdventurerStats stats)
     {
@@ -91,7 +92,7 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
         _race         = race;
         _level        = level;
         _nickname     = nickname;
-        _assignedRank = EAdventurerRank.None;
+        _assignedRank = assignedRank;
         _hiddenRank   = hiddenRank;
         _stats        = stats;
     }

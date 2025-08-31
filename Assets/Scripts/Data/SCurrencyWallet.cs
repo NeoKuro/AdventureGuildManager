@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 public struct SCurrencyWallet
 {
@@ -11,12 +12,9 @@ public struct SCurrencyWallet
 
     public int Silver
     {
-        get
-        {
-            return _wallet[ECurrency.Silver];
-        }
+        get { return _wallet[ECurrency.Silver]; }
     }
-    
+
     public int Gold
     {
         get { return _wallet[ECurrency.Gold]; }
@@ -30,6 +28,94 @@ public struct SCurrencyWallet
                       { ECurrency.Silver, startingSilver },
                       { ECurrency.Gold, startingGold }
                   };
+    }
+
+    public override string ToString()
+    {
+        if (TotalValue(ECurrency.Copper).value == 0)
+            return "0 Copper";
+
+        StringBuilder sb             = new StringBuilder();
+        bool          needsSeparator = false;
+
+        if (Gold > 0)
+        {
+            sb.Append($"{Gold} Gold");
+            needsSeparator = true;
+        }
+
+        if (Silver > 0)
+        {
+            if (needsSeparator)
+                sb.Append(Gold > 0 && Copper == 0 ? " and " : ", ");
+
+            sb.Append($"{Silver} Silver");
+            needsSeparator = true;
+        }
+
+        if (Copper > 0)
+        {
+            if (needsSeparator)
+                sb.Append(" and ");
+
+            sb.Append($"{Copper} Copper");
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Returns the value of the wallet, but instead of the raw currency values, they are summed
+    /// and normalized into each denomination
+    /// </summary>
+    /// <example>234 Copper, will read as;<br/>"2 silver, 34 copper"</example>
+    /// <returns></returns>
+    public string ToStringNormalized()
+    {
+        int totalCopper = (int)TotalValue(ECurrency.Copper).value;
+        if (totalCopper == 0)
+            return "0 Copper";
+
+        StringBuilder sb             = new StringBuilder();
+        bool          needsSeparator = false;
+
+        // Calculate normalized values
+        int normalizedGold   = totalCopper / 10000;
+        int remaining        = totalCopper % 10000;
+        int normalizedSilver = remaining / 100;
+        int normalizedCopper = remaining % 100;
+
+        if (normalizedGold > 0)
+        {
+            sb.Append($"{normalizedGold} Gold");
+            needsSeparator = true;
+        }
+
+        if (normalizedSilver > 0)
+        {
+            if (needsSeparator)
+                sb.Append(normalizedGold > 0 && normalizedCopper == 0 ? " and " : ", ");
+
+            sb.Append($"{normalizedSilver} Silver");
+            needsSeparator = true;
+        }
+
+        if (normalizedCopper > 0)
+        {
+            if (needsSeparator)
+                sb.Append(" and ");
+
+            sb.Append($"{normalizedCopper} Copper");
+        }
+
+        return sb.ToString();
+    }
+
+    public void AddCurrency(SCurrencyWallet wallet)
+    {
+        AddCurrency(ECurrency.Copper, wallet.Copper);
+        AddCurrency(ECurrency.Silver, wallet.Silver);
+        AddCurrency(ECurrency.Gold, wallet.Gold);
     }
 
     /// <summary>
@@ -67,7 +153,7 @@ public struct SCurrencyWallet
     /// automatically upgrade to that coin (you could have 100x 2p coins, but that doesn't become
     /// a £2 automatically)
     /// </example>
-    public (ECurrency, float) TotalValue(ECurrency currency = ECurrency.Gold)
+    public (ECurrency denomination, float value) TotalValue(ECurrency currency = ECurrency.Gold)
     {
         // 1 copper = lowest denomination
         // 1 silver = 100 coppers

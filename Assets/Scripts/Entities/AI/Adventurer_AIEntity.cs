@@ -5,11 +5,12 @@ using Hzn.Framework;
 
 using UnityEngine;
 
-public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildCore, IInventoryCore
+public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildAdventurer, IInventoryCore
 {
-    protected AIInventoryHandler _inventoryHandler;
-    private   Action             _onArriveAtTownCallback;
-    private   Action             _onArriveAtGuildCallback;
+    protected AdventurerGuildHandler _adventurerGuildHandler;
+    protected AIInventoryHandler     _inventoryHandler;
+    private   Action                 _onArriveAtTownCallback;
+    private   Action                 _onArriveAtGuildCallback;
 
     public SAdventurerData AdventurerData { get; private set; }
 
@@ -32,7 +33,8 @@ public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildCore, IInventoryCo
     public override void InitialiseBehaviour()
     {
         base.InitialiseBehaviour();
-        _inventoryHandler = new AIInventoryHandler(this);
+        _inventoryHandler       = new AIInventoryHandler(this);
+        _adventurerGuildHandler = new AdventurerGuildHandler(this);
     }
 
     /// <summary>
@@ -93,6 +95,11 @@ public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildCore, IInventoryCo
         return _inventoryHandler.CalculateConfidenceNormalized();
     }
 
+    public float EvaluateWealth()
+    {
+        return _inventoryHandler.EvaluateWealth();
+    }
+
     public void SetDestinationToTown()
     {
         Dbg.LogVerbose(Log.AI, "TO BE IMPLEMENTED: Setting destination to town");
@@ -106,6 +113,38 @@ public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildCore, IInventoryCo
         Dbg.LogVerbose(Log.AI, "TO BE IMPLEMENTED: Setting destination to Home");
         // TODO: needs to track the AI's home location (a house in town, which house, or a taven/inn room, or guild room?)
         throw new NotImplementedException();
+    }
+
+
+    public bool HasJob()
+    {
+        return _adventurerGuildHandler.HasActiveJob;
+    }
+
+    public float GetJobPriority()
+    {
+        return _adventurerGuildHandler.JobPriority();
+    }
+
+    public bool ShouldGetJob()
+    {
+        return _adventurerGuildHandler.ShouldGetJob();
+    }
+
+    public float GetGuildSatisfaction()
+    {
+        return _adventurerGuildHandler.Satisfaction;
+    }
+
+    public SJobData GetJob()
+    {
+        if (!_adventurerGuildHandler.CurrentJob.HasValue)
+        {
+            Dbg.Error(Log.AI, $"{nameof(GetJob)}: No job assigned!");
+            return default;
+        }
+
+        return _adventurerGuildHandler.CurrentJob.Value;
     }
 
 
@@ -132,6 +171,4 @@ public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildCore, IInventoryCo
     }
 
     #endregion
-
-
 }

@@ -150,6 +150,12 @@ public class AIInventoryHandler : InventoryHandler
         return conf;
     }
 
+    public float EvaluateWealth()
+    {
+        int   wealth = (int)_wallet.TotalValue(ECurrency.Copper).value;
+        return Mathf.Clamp01(wealth / _wealthExpectation);
+    }
+
     private bool CalculateItemScore(SInventoryItem item, int advLevel, out int score)
     {
         score = 0;
