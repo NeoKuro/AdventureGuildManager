@@ -5,7 +5,7 @@ using Hzn.Framework;
 
 public class GuildManager : Manager<GuildManager>
 {
-    private List<AdventurerEntity> _registeredAdventurers = new List<AdventurerEntity>();
+    private List<Adventurer_AIEntity> _registeredAdventurers = new List<Adventurer_AIEntity>();
 
     public async override void PreInitialSceneLoaded()
     {
@@ -22,15 +22,15 @@ public class GuildManager : Manager<GuildManager>
         Dbg.Error(Logging.Entities, "TODO - IMPLEMENT LOAD ADVENTURERS");
     }
 
-    private void ProcessNewAdventurer(AdventurerEntity adventurer)
+    private void ProcessNewAdventurer(Adventurer_AIEntity adventurerAI)
     {
-        if (_registeredAdventurers.Contains(adventurer))
+        if (_registeredAdventurers.Contains(adventurerAI))
         {
-            Dbg.Error(Logging.Entities, $"Trying to register new Adventurer {adventurer.AdventurerData.Name} already registered!");
+            Dbg.Error(Logging.Entities, $"Trying to register new Adventurer {adventurerAI.AdventurerData.Name} already registered!");
             return;
         }
         
-        _registeredAdventurers.Add(adventurer);
+        _registeredAdventurers.Add(adventurerAI);
     }
 
     #endregion
@@ -38,14 +38,14 @@ public class GuildManager : Manager<GuildManager>
 
     #region -- DATA ACCESS --
 
-    public bool TryGetAdventurer_ByName(string name, out AdventurerEntity adventurer)
+    public bool TryGetAdventurer_ByName(string name, out Adventurer_AIEntity adventurerAI)
     {
-        adventurer = null;
+        adventurerAI = null;
         for (int i = 0; i < _registeredAdventurers.Count; i++)
         {
             if (_registeredAdventurers[i].AdventurerData.Name == name)
             {
-                adventurer = _registeredAdventurers[i];
+                adventurerAI = _registeredAdventurers[i];
                 return true;
             }
         }
@@ -53,14 +53,14 @@ public class GuildManager : Manager<GuildManager>
         return false;
     }
 
-    public bool TryGetAdventurers_ByClass(EAdventurerClass adventurerClass, out AdventurerEntity adventurer)
+    public bool TryGetAdventurers_ByClass(EAdventurerClass adventurerClass, out Adventurer_AIEntity adventurerAI)
     {
-        adventurer = null;
+        adventurerAI = null;
         for (int i = 0; i < _registeredAdventurers.Count; i++)
         {
             if (_registeredAdventurers[i].AdventurerData.Class == adventurerClass)
             {
-                adventurer = _registeredAdventurers[i];
+                adventurerAI = _registeredAdventurers[i];
                 return true;
             }
         }
@@ -68,14 +68,14 @@ public class GuildManager : Manager<GuildManager>
         return false;
     }
 
-    public bool TryGetAdventurers_ByRace(ECharacterRace race, out AdventurerEntity adventurer)
+    public bool TryGetAdventurers_ByRace(ECharacterRace race, out Adventurer_AIEntity adventurerAI)
     {
-        adventurer = null;
+        adventurerAI = null;
         for (int i = 0; i < _registeredAdventurers.Count; i++)
         {
             if (_registeredAdventurers[i].AdventurerData.Race == race)
             {
-                adventurer = _registeredAdventurers[i];
+                adventurerAI = _registeredAdventurers[i];
                 return true;
             }
         }
@@ -88,9 +88,9 @@ public class GuildManager : Manager<GuildManager>
 
     #region -- PUBLIC API --
 
-    public static void RegisterNewAdventurer(AdventurerEntity adventurer)
+    public static void RegisterNewAdventurer(Adventurer_AIEntity adventurerAI)
     {
-        Get()?.ProcessNewAdventurer(adventurer);
+        Get()?.ProcessNewAdventurer(adventurerAI);
     }
 
     #endregion

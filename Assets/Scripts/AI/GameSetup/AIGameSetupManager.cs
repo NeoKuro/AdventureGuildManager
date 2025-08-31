@@ -61,7 +61,7 @@ namespace Hzn.AI.Core
                         for (int i = 0; i < entityCountToSpawn.Value; i++)
                         {
                             SpawnManager.Get().TryGetSpawnPoint(EEntityPrefabCategories.Adventurer, out Transform spawnPointTransform);
-                            if (EntityManager.Get().TryCreateAdventurerEntity(out AdventurerEntity adventurerEntity, spawnPointTransform))
+                            if (EntityManager.Get().TryCreateAdventurerEntity(out Adventurer_AIEntity adventurerEntity, spawnPointTransform))
                             {
                                 Dbg.Log(Log.AI, $"Spawned Adventurer Entity at {spawnPointTransform.position}");
                                 continue;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AIGuildStateMachine : StateMachine
 {
-    private IAICore _adventurer;
+    private IGuildCore _adventurer;
 
     private State VisitGuild;
     private State UseServices;
@@ -13,7 +13,7 @@ public class AIGuildStateMachine : StateMachine
     private State TurnInQuest;
     private State FinishGuildVisit;
 
-    public AIGuildStateMachine(IAICore aiAdventurer, bool tickable = false) : base(nameof(AIGuildStateMachine), tickable)
+    public AIGuildStateMachine(IGuildCore aiAdventurer, bool tickable = false) : base(nameof(AIGuildStateMachine), tickable)
     {
         _adventurer = aiAdventurer;
 

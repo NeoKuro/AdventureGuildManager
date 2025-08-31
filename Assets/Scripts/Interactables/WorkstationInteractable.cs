@@ -17,7 +17,7 @@ public abstract class WorkstationInteractable : BaseInteractable
     private Transform _workstationAnchorpoint;
 
     private bool                    _isManned         = false;
-    protected Queue<AdventurerEntity> _adventurersQueue = new Queue<AdventurerEntity>();
+    protected Queue<Adventurer_AIEntity> _adventurersQueue = new Queue<Adventurer_AIEntity>();
 
     protected abstract void ProcessInteract();
     protected abstract void BeginInteract();
@@ -34,7 +34,7 @@ public abstract class WorkstationInteractable : BaseInteractable
 
     public override void Interact(Entity interactingEntity)
     {
-        if (interactingEntity is not AdventurerEntity)
+        if (interactingEntity is not Adventurer_AIEntity)
         {
             Dbg.Log(Logging.Interactables, "WorkstationInteractable: Interact called by a non-adventurer entity");
             return;
@@ -52,7 +52,7 @@ public abstract class WorkstationInteractable : BaseInteractable
             return;
         }
         
-        OnNPCAdventurerInteracted(interactingEntity as AdventurerEntity);
+        OnNPCAdventurerInteracted(interactingEntity as Adventurer_AIEntity);
     }
 
     private void OnPlayerMovedOff()
@@ -61,8 +61,8 @@ public abstract class WorkstationInteractable : BaseInteractable
         LocalPlayerEntity.LocalPlayer.DeregisterOnPlayerMove(OnPlayerMovedOff);
     }
 
-    private void OnNPCAdventurerInteracted(AdventurerEntity adventurer)
+    private void OnNPCAdventurerInteracted(Adventurer_AIEntity adventurerAI)
     {
-        _adventurersQueue.Enqueue(adventurer);
+        _adventurersQueue.Enqueue(adventurerAI);
     }
 }

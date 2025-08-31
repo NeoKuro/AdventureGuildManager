@@ -38,7 +38,7 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
         get { return _nickname; }
     }
 
-    public string AssignedRank
+    public EAdventurerRank AssignedRank
     {
         get { return _assignedRank; }
     }
@@ -51,8 +51,8 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
     private string           _name;
     private ECharacterRace   _race;
     private int              _level;
-    private string           _assignedRank;
-    private string           _hiddenRank;
+    private EAdventurerRank  _assignedRank;
+    private EAdventurerRank  _hiddenRank;
     private string           _nickname;
     private SAdventurerStats _stats;
     private EAdventurerClass _class;
@@ -68,8 +68,8 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
         _class        = EAdventurerClass.Warrior;
         _race         = ECharacterRace.Human;
         _level        = 1;
-        _assignedRank = "";
-        _hiddenRank   = "F";
+        _assignedRank = EAdventurerRank.None;
+        _hiddenRank   = EAdventurerRank.F;
         _stats        = new SAdventurerStats();
         SetRandomRace();
         GenerateStatsForNewAdventurer();
@@ -83,7 +83,7 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
                            ECharacterRace race,
                            int level,
                            string nickname,
-                           string hiddenRank,
+                           EAdventurerRank hiddenRank,
                            SAdventurerStats stats)
     {
         _name         = name;
@@ -91,12 +91,12 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
         _race         = race;
         _level        = level;
         _nickname     = nickname;
-        _assignedRank = "";
+        _assignedRank = EAdventurerRank.None;
         _hiddenRank   = hiddenRank;
         _stats        = stats;
     }
 
-    public void SetAssignedRank(string rank)
+    public void SetAssignedRank(EAdventurerRank rank)
     {
         _assignedRank = rank;
     }
@@ -115,41 +115,9 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
             return 0;
         }
 
-        int hiddenRankIndex   = GetRankIndexFromRank(_hiddenRank);
-        int assignedRankIndex = GetRankIndexFromRank(_assignedRank);
+        int hiddenRankIndex   = (int)_hiddenRank;
+        int assignedRankIndex = (int)_assignedRank;
         return Mathf.Abs(hiddenRankIndex - assignedRankIndex);
-    }
-
-    public int GetRankIndexFromRank(string rank)
-    {
-        int rankIndex = 0;
-        switch (rank)
-        {
-            case "S":
-                rankIndex = 0;
-                break;
-            case "A":
-                rankIndex = 1;
-                break;
-            case "B":
-                rankIndex = 2;
-                break;
-            case "C":
-                rankIndex = 3;
-                break;
-            case "D":
-                rankIndex = 4;
-                break;
-            case "E":
-                rankIndex = 5;
-                break;
-            default:
-            case "F":
-                rankIndex = 6;
-                break;
-        }
-
-        return rankIndex;
     }
 
     private void GenerateStatsForNewAdventurer()
@@ -158,40 +126,40 @@ public struct SAdventurerData : IEquatable<SAdventurerData>
         int rankIndex     = Random.Range(0, 7);
         switch (rankIndex)
         {
-            case 0:
+            case 6:
                 _level        = Random.Range(95, 101);
-                _hiddenRank   = "S";
+                _hiddenRank   = EAdventurerRank.S;
                 maxStatPoints = 10000;
                 break;
-            case 1:
+            case 5:
                 _level        = Random.Range(85, 95);
-                _hiddenRank   = "A";
+                _hiddenRank   = EAdventurerRank.A;
                 maxStatPoints = 3200;
                 break;
-            case 2:
+            case 4:
                 _level        = Random.Range(70, 85);
-                _hiddenRank   = "B";
+                _hiddenRank   = EAdventurerRank.B;
                 maxStatPoints = 1600;
                 break;
             case 3:
                 _level        = Random.Range(50, 70);
-                _hiddenRank   = "C";
+                _hiddenRank   = EAdventurerRank.C;
                 maxStatPoints = 800;
                 break;
-            case 4:
+            case 2:
                 _level        = Random.Range(30, 50);
-                _hiddenRank   = "D";
+                _hiddenRank   = EAdventurerRank.D;
                 maxStatPoints = 400;
                 break;
-            case 5:
+            case 1:
                 _level        = Random.Range(10, 30);
-                _hiddenRank   = "E";
+                _hiddenRank   = EAdventurerRank.E;
                 maxStatPoints = 200;
                 break;
-            case 6:
+            case 0:
             default:
                 _level        = Random.Range(1, 10);
-                _hiddenRank   = "F";
+                _hiddenRank   = EAdventurerRank.F;
                 maxStatPoints = 100;
                 break;
         }

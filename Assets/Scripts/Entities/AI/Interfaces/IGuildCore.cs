@@ -1,12 +1,9 @@
 ﻿using System;
 
-public interface IAICore
+public interface IGuildCore : IAICore
 {
-    void InitialiseBehaviour();
-    
-    void UpdateBehaviour();
-
     void RegisterArrivedAtGuildCallback(Action onArrive);
-    
+
     void UnregisterArrivedAtGuildCallback(Action onArrive);
+
 }

@@ -3,9 +3,14 @@
 
     using Hzn.Framework;
 
+    using UnityEngine;
+
     public class AIBehaviourManager : Manager<AIBehaviourManager>, ITickable, ITickableUpdate, ICoreAIManager
     {
-        private List<IAICore> _aiCore = new List<IAICore>();
+        private const float         BEHAVIOUR_UPDATE_PERIOD = 5f;
+
+        private float         _nextUpdateTime = 0f;
+        private List<IAICore> _aiCore         = new List<IAICore>();
         
         public void ActivateAIManager()
         {
@@ -14,10 +19,17 @@
         
         public void Update(float deltaT)
         {
+            if (Time.time < _nextUpdateTime)
+            {
+                return;
+            }
+            
             for (int i = 0; i < _aiCore.Count; i++)
             {
-                _aiCore[i]?.UpdateBehaviour();
+                _aiCore[i]?.FixedUpdateBehaviour();
             }
+            
+            _nextUpdateTime = Time.time + BEHAVIOUR_UPDATE_PERIOD;
         }
 
         public static void RegisterNewAI(IAICore ai)

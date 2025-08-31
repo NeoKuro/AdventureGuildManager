@@ -10,18 +10,18 @@ public class ReceptionWorkstation : WorkstationInteractable
     [SerializeField]
     private NewAdventurerFormController _newMemberForm;
 
-    private AdventurerEntity _activeAdventurer;
+    private Adventurer_AIEntity activeAdventurerAI;
     
     public void OnSignNewAdventurer(SAdventurerData newAdventurerData)
     {
         AdventurerManager.AddAdventurer(newAdventurerData);
-        _activeAdventurer.OnAdventurerSigned(newAdventurerData);
+        activeAdventurerAI.OnAdventurerSigned(newAdventurerData);
         Dbg.Log(Logging.Interactables, "NEXT UP -- Need to process to the NEXT adventurer in queue");
     }
 
     public void OnRejectCurrentAdventurer()
     {
-        _activeAdventurer.OnAdventurerRejected();
+        activeAdventurerAI.OnAdventurerRejected();
         Dbg.Log(Logging.Interactables, "ReceptionWorkstation: Rejected current adventurer");
         Dbg.Log(Logging.Interactables, "NEXT UP -- Need to process to the NEXT adventurer in queue");
     }
@@ -49,8 +49,8 @@ public class ReceptionWorkstation : WorkstationInteractable
             return;
         }
 
-        _activeAdventurer = _adventurersQueue.Dequeue();
-        _newMemberForm.StartNewAdventurerForm(_activeAdventurer.AdventurerData);
+        activeAdventurerAI = _adventurersQueue.Dequeue();
+        _newMemberForm.StartNewAdventurerForm(activeAdventurerAI.AdventurerData);
         _newMemberForm.RegisterReceptionWorkstation(this);
     }
 
@@ -105,14 +105,14 @@ public class ReceptionWorkstation : WorkstationInteractable
 
     private void Dbg_QueueAdventurer(string[] args)
     {
-        AdventurerEntity adventurer = null;
-        if(!EntityManager.Get()?.TryCreateAdventurerEntity(out adventurer) ?? false)
+        Adventurer_AIEntity adventurerAI = null;
+        if(!EntityManager.Get()?.TryCreateAdventurerEntity(out adventurerAI) ?? false)
         {
             Dbg.Error(Logging.Interactables, "Failed to create adventurer entity");
             return;
         }
         
-        Interact(adventurer);
+        Interact(adventurerAI);
     }
     #endif
 }

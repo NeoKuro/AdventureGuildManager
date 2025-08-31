@@ -162,9 +162,9 @@ public class EntityManager : MonoManager<EntityManager, EntityManagerData>
         return true;
     }
 
-    public bool TryCreateAdventurerEntity(out AdventurerEntity adventurer, Transform spawnPoint = null)
+    public bool TryCreateAdventurerEntity(out Adventurer_AIEntity adventurerAI, Transform spawnPoint = null)
     {
-        adventurer = null;
+        adventurerAI = null;
         if (!IsReady)
         {
             Dbg.Error(Logging.Entities, $"Manager is not ready, data has not been sync'd. Cannot create new AdventurerEntity");
@@ -188,15 +188,15 @@ public class EntityManager : MonoManager<EntityManager, EntityManagerData>
         GameObject obj  = entityObj.gameObject;
         Transform  root = entityObj.GeometryRoot;
 
-        adventurer = obj.AddComponent<AdventurerEntity>();
-        adventurer.SpawnAdventurer(true);
+        adventurerAI = obj.AddComponent<Adventurer_AIEntity>();
+        adventurerAI.SpawnAdventurer(true);
         List<GameObject> prefabs = _entityPrefabs
                                    .Where(x => (x.category & EEntityPrefabCategories.Adventurer) == EEntityPrefabCategories.Adventurer)
                                    .SelectMany(x => x.prefabs)
                                    .ToList();
         GameObject prefab = prefabs.GetRandom();
 
-        if (!VerifyEntity(root, adventurer, prefab))
+        if (!VerifyEntity(root, adventurerAI, prefab))
         {
             Dbg.Error(Logging.Entities, "Failed to create adventurer entity");
             return false;
@@ -219,27 +219,27 @@ public class EntityManager : MonoManager<EntityManager, EntityManagerData>
 
         if (prefab == null)
         {
-            Dbg.Error(Logging.Entities, "No player prefab found - has it been configured?");
+            Dbg.Error(Logging.Entities, "No prefab found - has it been configured?");
             Object.Destroy(entityObj);
             return false;
         }
 
         if (entityObj == null)
         {
-            Dbg.Error(Logging.Entities, "Failed to create player entity");
+            Dbg.Error(Logging.Entities, "Failed to create entity");
             return false;
         }
 
         if (!entityObj.CreateNewEntity(root, prefab))
         {
-            Dbg.Error(Logging.Entities, "Failed to create player entity");
+            Dbg.Error(Logging.Entities, "Failed to create entity");
             Object.Destroy(entityObj);
             return false;
         }
 
         if (!_entityPrefabsList.TryAdd(entityObj.EntityID, entityObj.EntityPrefab))
         {
-            Dbg.Error(Logging.Entities, "Failed to add player entity to list");
+            Dbg.Error(Logging.Entities, "Failed to add entity to list");
             Object.Destroy(entityObj);
             return false;
         }

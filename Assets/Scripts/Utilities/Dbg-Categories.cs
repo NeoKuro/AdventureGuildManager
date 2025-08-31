@@ -26,6 +26,7 @@ namespace Hzn.Framework
         public static readonly string DataStore     = "[DATASTORE]";
         public static readonly string Entities      = "[ENTITY]";
         public static readonly string Interactables = "[INTERACTABLE]";
+        public static readonly string Inventory     = "[INVENTORY]";
         public static readonly string Utils         = "[UTILS]";
     }
 }
