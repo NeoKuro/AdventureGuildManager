@@ -28,6 +28,11 @@ public class StaffEntity : Entity, IGuildStaff, ITownCore
         
     }
 
+    public void SetDestination(Vector3 destination)
+    {
+        throw new NotImplementedException();
+    }
+
     public Dictionary<EEntityPriorities, float> EvaluateStats()
     {
         return _statsHandler.EvaluateStats();
@@ -59,6 +64,16 @@ public class StaffEntity : Entity, IGuildStaff, ITownCore
     public void UnregisterArrivedAtGuildCallback(Action onArrive)
     {
         _onArriveAtGuildCallback -= onArrive;
+    }
+
+    public void RegisterFrontOfQueueCallback(Action onFront)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UnregisterFrontOfQueueCallback(Action onFront)
+    {
+        throw new NotImplementedException();
     }
 
     public float GetGuildSatisfaction()

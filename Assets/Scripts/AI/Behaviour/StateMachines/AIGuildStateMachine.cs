@@ -5,6 +5,7 @@ using UnityEngine;
 public class AIGuildStateMachine : StateMachine
 {
     private IGuildCore _adventurer;
+    private Adventurer_AIEntity _adventurerEntity;
 
     private State VisitGuild;
     private State UseServices;
@@ -12,10 +13,13 @@ public class AIGuildStateMachine : StateMachine
     private State ChooseQuest;
     private State TurnInQuest;
     private State FinishGuildVisit;
+    
+    private GuildServiceController _guildServiceController;
 
     public AIGuildStateMachine(IGuildCore aiAdventurer, bool tickable = false) : base(nameof(AIGuildStateMachine), tickable)
     {
         _adventurer = aiAdventurer;
+        _adventurerEntity = _adventurer as Adventurer_AIEntity;
 
         CreateAndAddState(ref VisitGuild, nameof(VisitGuild));
         CreateAndAddState(ref UseServices, nameof(UseServices));
@@ -131,6 +135,17 @@ public class AIGuildStateMachine : StateMachine
         FinishGuildVisit
             .DeclareExitState()
             .OnEntry(OnEnterFinishGuildVisit);
+
+
+
+        if (_adventurerEntity == null)
+        {
+            Dbg.Error(Log.AI, "AI Adventurer is not an AIEntity");
+            ChangeState(FinishGuildVisit);
+            return;
+        }
+
+        ChangeState(VisitGuild);
     }
 
     private void OnEnterVisitGuild()
@@ -172,6 +187,8 @@ public class AIGuildStateMachine : StateMachine
     private void OnEnterUseServices()
     {
         Dbg.LogVerbose(Log.AI, "ENTERED: Use Services state");
+        // TODO: Make this a state machine
+        //  - Pick which service to use - depending on availability in the guild
         // Decide which service to use
         //      Should this be a new State machine to make it more easily extendable as we get more services/features added?
         //      Make the services generic (IGuildService.UseService()) for example?
@@ -191,6 +208,27 @@ public class AIGuildStateMachine : StateMachine
     private void OnEnterRegisterGuild()
     {
         Dbg.LogVerbose(Log.AI, "ENTERED: Register Guild state");
+
+        _guildServiceController = GuildManager.GetReceptionBalanced();
+        ReceptionController receptionController = _guildServiceController as ReceptionController;
+        if (receptionController == null)
+        {
+            Dbg.Error(Logging.Guild, "Could not get ReceptionController from GuildManager");
+            ChangeState(FinishGuildVisit);
+            return;
+        }
+
+        // This may happen if the queue has reached it's absolute maximum
+        //  TODO: FUTURE-FEATURE: Instead of leaving immediately, enter a 'Wandering state' - for now just leave
+        //      early. Maybe keep it like this as its probably going to mean the queue(s) are quite big anyway
+        if (!receptionController.TryEnqueueEntity(_adventurerEntity, out Vector3 destination))
+        {
+            Dbg.LogVerbose(Logging.Guild, "Could not enqueue AIEntity to ReceptionController, leaving the guild");
+            ChangeState(FinishGuildVisit);
+            return;
+        }
+        _adventurer.SetDestination(destination);
+        _adventurer.RegisterFrontOfQueueCallback(OnRegisterAtGuild);
         // Queue up at the reception area (if space + needed) - Is possible for queue to be too long and 'no more room' missing
         //      out on potential members - if that's the case they should wander around for a moment then if still unable to, leave?
         //      - Maybe just leave (if we want the 'wander' behaviour will need that as a state)
@@ -202,7 +240,7 @@ public class AIGuildStateMachine : StateMachine
     {
         Dbg.LogOnce(Log.AI, "TODO: Turn this into a Callback?");
         // Wait around for the result / player's decision on their registration
-        //  - This could be a CALLBACK? (Instead of adding such callback to IAICore, add it to an IAdventurerCore? since only Adv. will
+        //  TODO - This could be a CALLBACK? (Instead of adding such callback to IAICore, add it to an IAdventurerCore? since only Adv. will
         //      be registering at the guild?)
     }
 
@@ -254,5 +292,42 @@ public class AIGuildStateMachine : StateMachine
         //  -- Successfully concluded business at the Guild Hall, so now do something else
         //      -- Could go hunting/training, do the quest they picked up, go home, go shopping, socialise in town etc
         CompleteAndPause();
+    }
+
+    private void OnRegisterAtGuild()
+    {
+        ReceptionController reception = _guildServiceController as ReceptionController;
+        if (reception == null)
+        {
+            Dbg.Error(Logging.Guild, $"Could not get ReceptionController from [{nameof(_guildServiceController)}]");
+            ChangeState(FinishGuildVisit);
+            return;
+        }
+        
+        reception.RegisterWithGuild(_adventurerEntity);
+    }
+
+    private void OnTurnInQuest()
+    {
+        ReceptionController reception = _guildServiceController as ReceptionController;
+        if (reception == null)
+        {
+            Dbg.Error(Logging.Guild, $"Could not get ReceptionController from [{nameof(_guildServiceController)}]");
+            ChangeState(FinishGuildVisit);
+            return;
+        }
+        reception.TurnInQuest(_adventurerEntity);
+    }
+
+    private void OnAcceptQuest()
+    {
+        ReceptionController reception = _guildServiceController as ReceptionController;
+        if (reception == null)
+        {
+            Dbg.Error(Logging.Guild, $"Could not get ReceptionController from [{nameof(_guildServiceController)}]");
+            ChangeState(FinishGuildVisit);
+            return;
+        }
+        reception.AcceptQuest(_adventurerEntity);
     }
 }

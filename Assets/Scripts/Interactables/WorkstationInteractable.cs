@@ -34,11 +34,13 @@ public abstract class WorkstationInteractable : BaseInteractable
 
     public override void Interact(Entity interactingEntity)
     {
-        if (interactingEntity is not Adventurer_AIEntity)
+        if (interactingEntity is not Adventurer_AIEntity &&
+            interactingEntity is not PlayerEntity)
         {
             Dbg.Log(Logging.Interactables, "WorkstationInteractable: Interact called by a non-adventurer entity");
             return;
         }
+        
         
         if (interactingEntity is LocalPlayerEntity)
         {

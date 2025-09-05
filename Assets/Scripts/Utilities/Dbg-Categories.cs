@@ -8,8 +8,12 @@ public static class Dbg_Categories
                                                               {
                                                                   Logging.DataStore,
                                                                   Logging.Entities,
+                                                                  Logging.Guild,
                                                                   Logging.Interactables,
-                                                                  Logging.Utils
+                                                                  Logging.Inventory,
+                                                                  Logging.Town,
+                                                                  Logging.Utils,
+                                                                  Logging.Wilderness
                                                               };
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -25,8 +29,11 @@ namespace Hzn.Framework
     {
         public static readonly string DataStore     = "[DATASTORE]";
         public static readonly string Entities      = "[ENTITY]";
+        public static readonly string Guild         = "[GUILD]";
         public static readonly string Interactables = "[INTERACTABLE]";
         public static readonly string Inventory     = "[INVENTORY]";
+        public static readonly string Town          = "[TOWN]";
         public static readonly string Utils         = "[UTILS]";
+        public static readonly string Wilderness    = "[WILDERNESS]";
     }
 }

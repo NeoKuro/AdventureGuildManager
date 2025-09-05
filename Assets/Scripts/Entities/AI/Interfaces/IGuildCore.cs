@@ -6,6 +6,9 @@ public interface IGuildCore : IAICore
 
     void UnregisterArrivedAtGuildCallback(Action onArrive);
 
+    void RegisterFrontOfQueueCallback(Action onFront);
+    void UnregisterFrontOfQueueCallback(Action onFront);
+
     float GetGuildSatisfaction();
 
 }

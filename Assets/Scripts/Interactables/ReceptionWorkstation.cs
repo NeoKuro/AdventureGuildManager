@@ -94,7 +94,9 @@ public class ReceptionWorkstation : WorkstationInteractable
     protected override void InitialiseInteractable()
     {
         Dbg.Log(Logging.Interactables, "ReceptionWorkstation: Initialised");
+        #if UNITY_EDITOR
         RegisterCommands();
+        #endif
     }
     
     #if UNITY_EDITOR

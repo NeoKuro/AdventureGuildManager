@@ -2,7 +2,9 @@
 
 using Hzn.Framework;
 
-public abstract class AIEntity : Entity, IAICore
+using UnityEngine;
+
+public abstract class AIEntity : Entity, IAICore, IQueueable
 {
     protected StatsHandler _statsHandler;
 
@@ -13,6 +15,12 @@ public abstract class AIEntity : Entity, IAICore
     }
 
     public abstract void FixedUpdateBehaviour();
+
+    public void SetDestination(Vector3 destination)
+    {
+        // TODO: Create a navigation controller which handles setting destinations with NavMesh etc
+        throw new System.NotImplementedException();
+    }
 
     public Dictionary<EEntityPriorities, float> EvaluateStats()
     {
@@ -49,5 +57,26 @@ public abstract class AIEntity : Entity, IAICore
         //      they generally want to do (need to heal, rest, eat etc). But beyond that we start looking into what they
         //      have or don't have, want etc.
         return priorities;
+    }
+
+    public void NotifyRemovedFromQueue()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void NotifyQueueCleared()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void MoveToNextQueuePosition(Vector3 position)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnReachedFrontOfQueue()
+    {
+        // 
+        throw new System.NotImplementedException();
     }
 }

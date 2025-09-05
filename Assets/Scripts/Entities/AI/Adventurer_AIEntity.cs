@@ -11,6 +11,7 @@ public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildAdventurer, IInven
     protected AIInventoryHandler     _inventoryHandler;
     private   Action                 _onArriveAtTownCallback;
     private   Action                 _onArriveAtGuildCallback;
+    private   Action                 _onMoveToFrontOfQueueCallback;
 
     public SAdventurerData AdventurerData { get; private set; }
 
@@ -168,6 +169,16 @@ public class Adventurer_AIEntity : AIEntity, ITownCore, IGuildAdventurer, IInven
     public void UnregisterArriveAtTownDestinationCallback(Action onArrive)
     {
         _onArriveAtTownCallback -= onArrive;
+    }
+
+    public void RegisterFrontOfQueueCallback(Action onArrive)
+    {
+        _onMoveToFrontOfQueueCallback += onArrive;
+    }
+
+    public void UnregisterFrontOfQueueCallback(Action onArrive)
+    {
+        _onMoveToFrontOfQueueCallback -= onArrive;
     }
 
     #endregion

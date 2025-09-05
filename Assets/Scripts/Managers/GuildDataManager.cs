@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Hzn.Framework;
 
-public class GuildManager : Manager<GuildManager>
+public class GuildDataManager : Manager<GuildDataManager>
 {
     private List<Adventurer_AIEntity> _registeredAdventurers = new List<Adventurer_AIEntity>();
 

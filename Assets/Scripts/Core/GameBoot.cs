@@ -32,8 +32,10 @@ public class GameBoot
         Dbg.Log(Log.Boot, $"Creating core managers");
         Boot.RegisterCoreManagerInstances(new IManager[]
                                           { 
-                                              GuildManager.Create(),
+                                              TimeManager.Create(),
+                                              GuildDataManager.Create(),
                                               AICoreManager.Create(),
+                                              AIBehaviourManager.Create(),
                                           });
     }
 
